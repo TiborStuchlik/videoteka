@@ -15,7 +15,13 @@
     }, this);
 
     this.navigation.on('select', function(m, r) {
-      if (r.raw.cmp) this.netzkeNavigateTo(r.raw.cmp);
+      //if (r.raw.cmp) this.netzkeNavigateTo(r.raw.cmp);
+        var cmp = r.raw.cmp
+        var node = this.navigation.getStore().getById(cmp);
+        this.navigation.getSelectionModel().select(node);
+        this.netzkeLoadComponent(cmp, {container: this.mainPanel, callback: function(cmp) {
+            //this.updateInfo(cmp.desc);
+        }, scope: this});
     }, this);
   },
 
@@ -28,7 +34,7 @@
   },
 
   updateInfo: function(html) {
-    this.infoPanel.body.update("<img style='position: relative; top: 3px; margin-right: 3px;' src='/images/icons/information.png' />" + html);
+    //this.infoPanel.body.update("<img style='position: relative; top: 3px; margin-right: 3px;' src='/images/icons/information.png' />" + html);
   },
 
   onAbout: function() {

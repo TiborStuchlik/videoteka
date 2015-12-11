@@ -27,7 +27,7 @@ class Application < Netzke::Basepack::Viewport
 
   js_configure do |c|
     c.layout = :fit
-    #c.mixin
+    c.mixin
   end
 
   def configure(c)
@@ -49,7 +49,12 @@ class Application < Netzke::Basepack::Viewport
   #
   # Components
   #
-
+  
+  component :from_text do |c|
+    c.desc = "Grid configured with just a model. Implements infinite scrolling, per-column filtering, sorting, and CRUD operations. " + source_code_link(c)
+  end
+  
+  
   component :movies do |c|
     c.desc = "Grid configured with just a model. Implements infinite scrolling, per-column filtering, sorting, and CRUD operations. " + source_code_link(c)
   end
@@ -128,7 +133,14 @@ protected
             leaf("Soubory", :files, :bullet_black),
             leaf("Originální Média", :mediums, :bullet_black),
             leaf("Přenosná média", :transports, :bullet_black),
-            leaf("Imports", :imports, :bullet_black)
+            {
+            :text => "Imports",  
+            :expanded => true,
+            :children => [
+              leaf("Z textu", :from_text, :bullet_black),
+              leaf("Ruřně", :handy, :bullet_black),
+       
+            ]}
           ]
         },
 

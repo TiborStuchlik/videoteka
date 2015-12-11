@@ -1,7 +1,7 @@
 class Movies < Netzke::Basepack::Grid
   def configure(c)
     super
-    c.model = "Movie"
+    c.model = "Import"
   end
 
   #include PgGridTweaks
