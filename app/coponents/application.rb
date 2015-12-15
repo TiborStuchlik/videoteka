@@ -104,7 +104,7 @@ protected
   def leaf(text, component, icon = nil)
     { text: text,
       id: component,
-      icon: icon && uri_to_icon(icon),
+      icon: uri_to_icon(icon),
       cmp: component,
       leaf: true
     }
@@ -121,7 +121,7 @@ protected
             :text => "Filmy",  
             :expanded => true,
             :children => [
-              leaf("Seznam", :movies, :bullet_black),
+              leaf("Seznam", :movies, :film),
               leaf("Filmotéka", :movieteka, :bullet_black),
        
             ]},

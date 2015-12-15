@@ -1,7 +1,7 @@
 class Movie < ActiveRecord::Base
-  has_and_belongs_to_many :genres
-  has_and_belongs_to_many :countries
-  has_many :movie_roles, -> { includes( :role, :authors) }
+  has_and_belongs_to_many :genres,:dependent => :destroy
+  has_and_belongs_to_many :countries, :dependent => :destroy
+  has_many :movie_roles, -> { includes( :role, :authors) }, :dependent => :destroy
   has_many :roles, :through => :movie_roles
   belongs_to :box
   

@@ -9,13 +9,16 @@ class Imports < Netzke::Basepack::Grid
     c.klass = Netzke::Basepack::GridLiveSearch
     c.delay = 1 # our tests require immediate update
   end
+
   
   def configure(c)
     super
     c.model = "Import"
     c.columns = [
       {width: 70,name: :thajsko},
-      {width: 70,name: :movie_id},
+      {width: 70,
+       name: :mtext
+      },
       {width: 220, name: :file_name}, 
       {width: 150, name: :box}, 
       {width: 250, name: :name}, 

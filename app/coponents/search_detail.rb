@@ -31,7 +31,7 @@ class SearchDetail < Netzke::Base
     JS
   end
   
-  endpoint :scsfd do |p,t|
+  endpoint :refresh_movie do |p,t|
     puts "ss"
   end
   
