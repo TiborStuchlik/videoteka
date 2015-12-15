@@ -13,11 +13,15 @@ class Imports < Netzke::Basepack::Grid
   def configure(c)
     super
     c.model = "Import"
-    c.columns = [{width: 300, name: :file_name}, 
-      {width: 300, name: :box}, 
-      {width: 300, name: :name}, 
+    c.columns = [
+      {width: 70,name: :thajsko},
+      {width: 70,name: :movie_id},
+      {width: 220, name: :file_name}, 
+      {width: 150, name: :box}, 
+      {width: 250, name: :name}, 
       {width: 70,name: :count}, 
-      {width: 70,name: :thajsko}]
+      
+      ]
     c.tbar = [
       "fn:", {xtype: 'textfield', attr: :file_name, op: 'contains'},
       "box:", {xtype: 'textfield', attr: :box, op: 'contains'},

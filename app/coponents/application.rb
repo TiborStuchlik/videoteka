@@ -37,7 +37,7 @@ class Application < Netzke::Basepack::Viewport
       { layout: :border,
         tbar: [header_html],
         items: [
-          { region: :west, item_id: :navigation, width: 300, split: true, xtype: :treepanel, root: menu, root_visible: false, border: false, title: "Navigation" },
+          { region: :west, item_id: :navigation, width: 170, split: true, xtype: :treepanel, root: menu, root_visible: false, border: false, title: "Navigation" },
           { region: :center, layout: :border, border: false, items: [
             { item_id: :main_panel, region: :center, layout: :fit, border: false, items: [{border: false, body_padding: 5, html: "Components will be loaded in this area"}] } # items is only needed here for cosmetic reasons (initial border)
           ]}
@@ -121,7 +121,7 @@ protected
             :text => "Filmy",  
             :expanded => true,
             :children => [
-              leaf("Seznam", :movies_list, :bullet_black),
+              leaf("Seznam", :movies, :bullet_black),
               leaf("Filmotéka", :movieteka, :bullet_black),
        
             ]},

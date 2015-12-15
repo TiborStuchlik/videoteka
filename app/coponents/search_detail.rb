@@ -16,22 +16,24 @@ class SearchDetail < Netzke::Base
   end
   
   endpoint :add_import do |p,t|
-    add_movie(p['obj'])
-    x = read_movie(p['csfd_id'])
+    i = Import.find(p['import_id'])
+    add_movie(p['obj'], i)
+    x = read_movie(p['csfd_id'], i)
+    i.movie_id = x.id
+    i.save
     t.netzke_feedback("import")
   end
   
-  def read_movie(val)
+  def read_movie(val, i)
     uri = URI.parse("http://csfdapi.cz/movie/" + val.to_s)
     http = Net::HTTP.new(uri.host, uri.port)
     request = Net::HTTP::Get.new(uri.request_uri)
     json = http.request(request).body
     result = JSON.parse(http.request(request).body)
-    add_movie(result)
-    result
+    add_movie(result, i)
   end
   
-  def add_movie(mh)
+  def add_movie(mh, i)
     m = Movie.find_by_csfd_id(mh['id'])
     if !m
       m = Movie.new( csfd_id: mh['id'])
@@ -50,16 +52,18 @@ class SearchDetail < Netzke::Base
     m[:api_url] = mh['api_url'] if mh['api_url']
     m[:runtime] = mh['runtime'] if mh['runtime']
     m[:content_rating] = mh['content_rating'] if mh['content_rating']
+    add_box(m,i)
     m.save
     add_genres(mh['genres'], m) if mh['genres'] 
     add_countries(mh['countries'], m) if mh['countries'] 
     add_roles(mh['authors'], m) if mh['authors'] 
-    
+    m
 
   end
   
-  def add_author
-    
+  def add_box(m,i)
+    b = Box.find_or_create_by( name: i.box)
+    m.box = b
   end
   
   def add_genres(gs, m)
