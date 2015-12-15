@@ -55,14 +55,22 @@ class Imports < Netzke::Basepack::Grid
     component_session[:selected_import_id] = p[:import_id]
   end  
   
+  endpoint :csfd_search do |p,t|
+    #iid = component_session[:selected_import_id]
+    #i = Import.find(iid)
+    r = csfd_search(p)
+    t.netzke_feedback(p)
+    t.result(r, (r.map {|m| m[0]}).join)
+ end 
+
+
   endpoint :fill_search do |p,t|
     iid = component_session[:selected_import_id]
     i = Import.find(iid)
     r = csfd_search(i.name)
     t.netzke_feedback(i.name)
     t.result(r, (r.map {|m| m[0]}).join)
-    puts iid
-  end 
+ end 
   
   def make_html(doc,json)
     o = "<div style='padding: 10px'><table border='1'><tr>"

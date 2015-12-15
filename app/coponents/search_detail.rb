@@ -1,18 +1,38 @@
 class SearchDetail < Netzke::Base
+  
+  action :scsfd do |c|
+    c.text = "GO"
+  end
+  
   def configure(c)
     #super
     c.autoScroll = true
     c.title = "detail hledani"
     c.width = 600
+    c.tbar = [
+      "->",
+      "hledat v csfd ", {xtype: 'textfield', id: "textCsfd" },:scsfd]
   end
   
   js_configure do |c|
         
+    c.onScsfd = <<-JS
+      function(r,t) {
+       var im = this.ownerCt.netzkeGetComponent('imports')
+        im.csfdSearch(Ext.getCmp('textCsfd').value)
+        //this.scsfd(Ext.getCmp('textCsfd').value)
+      }
+    JS
+    
     c.add = <<-JS
       function(r,t) {
        alert('import')
       }
     JS
+  end
+  
+  endpoint :scsfd do |p,t|
+    puts "ss"
   end
   
   endpoint :add_import do |p,t|
