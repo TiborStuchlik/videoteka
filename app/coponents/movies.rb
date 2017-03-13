@@ -1,6 +1,6 @@
 include ActionView::Helpers::UrlHelper
 
-class Movies < Netzke::Basepack::Grid
+class Movies < Netzke::Grid::Base
    include Netzke::Basepack::ActionColumn
 
   action :reread do |c|
@@ -24,31 +24,32 @@ class Movies < Netzke::Basepack::Grid
       { name: :year, width: 60, format: "Y" },
      # { name: :rezie, width: 200 },
       { name: :name_cs, width: 200 },
-      { name: :name_en, width: 200 },
-      { name: :plot, width: 300 },
+      #{ name: :name_en, width: 200 },
+      #{ name: :plot, width: 300 },
       { name: :csfd_url, width: 70,
         getter: ->(r){ link_to(r.csfd_id, r.csfd_url) }
       },
       { name: :runtime, width: 100 },
-      { name: :content_rating, width: 100 }
+      #{ name: :content_rating, width: 100 }
 
       ]
   end
   
-  endpoint :select_movie do |p,t|
-    component_session[:selected_movie_id] = p[:movie_id]
+  endpoint :select_movie do 
+    client.netzke_notify(config.client_config['selected_movie_id'])
+    #component_session[:selected_movie_id] = p[:movie_id]
   end
 
-  endpoint :reread do |p,t|
+  endpoint :reread do |p|
     #component_session[:selected_movie_id] = p[:movie_id]
     Csfdapi.read_movies(p)
 
   end
 
 
-  js_configure do |c|
+  client_class do |c|
 
-    c.onReread = <<-JS
+    c.onReread = l(<<-JS)
       function(r,t) {
         var idA = this.getSelectionModel().getSelection().map(function(obj){ 
         return obj.id;
@@ -59,24 +60,25 @@ class Movies < Netzke::Basepack::Grid
       }
     JS
     
-    
-    c.result = <<-JS
+    c.result = l(<<-JS)
       function(r,t) {
         var sd = this.ownerCt.netzkeGetComponent('search_detail')
         sd.update(t)
       }
     JS
     
-    c.init_component = <<-JS
+    c.init_component = l(<<-JS)
       function(){
         this.callParent();
         var view = this.getView();
 
         view.on('itemclick', function(view, record){
-          this.selectMovie({movie_id: record.get('id')});
+          this.serverConfig.selected_movie_id = record.get('id')
+          this.server.selectMovie();
           //this.fillSearch();
         }, this);
       }
     JS
+    
   end  
 end

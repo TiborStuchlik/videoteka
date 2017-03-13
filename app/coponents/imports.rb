@@ -3,7 +3,7 @@ require "net/http"
 
 include ActionView::Helpers::UrlHelper
 
-class Imports < Netzke::Basepack::Grid
+class Imports < Netzke::Grid::Base
   
   plugin :grid_live_search do |c|
     c.klass = Netzke::Basepack::GridLiveSearch
@@ -33,15 +33,16 @@ class Imports < Netzke::Basepack::Grid
     ]
   end
 
-  js_configure do |c|
+  client_class do |c|
         
-    c.result = <<-JS
+    c.result = l(<<-JS)
       function(r,t) {
         var sd = this.ownerCt.netzkeGetComponent('search_detail')
         sd.update(t)
       }
     JS
-    c.init_component = <<-JS
+    
+    c.init_component = l(<<-JS)
       function(){
         this.callParent();
         var view = this.getView();
@@ -54,16 +55,16 @@ class Imports < Netzke::Basepack::Grid
     JS
   end  
 
-  endpoint :select_import do |p,t|
+  endpoint :select_import do |p|
     component_session[:selected_import_id] = p[:import_id]
   end  
   
-  endpoint :csfd_search do |p,t|
+  endpoint :csfd_search do |p|
     #iid = component_session[:selected_import_id]
     #i = Import.find(iid)
     r = csfd_search(p)
-    t.netzke_feedback(p)
-    t.result(r, (r.map {|m| m[0]}).join)
+    client.netzke_feedback(p)
+    client.result(r, (r.map {|m| m[0]}).join)
  end 
 
 

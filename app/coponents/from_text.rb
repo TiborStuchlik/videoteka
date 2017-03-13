@@ -2,18 +2,19 @@ class FromText < Netzke::Base
   def configure(c)
     #super
         c.items = [
-      { netzke_component: :imports, title: "Imports", region: "center" },
-      { netzke_component: :search_detail, title: "Hledat", region: "east" }
+      { component: :imports, title: "Imports", region: "center" },
+      { component: :search_detail, title: "Hledat", region: "east" }
     ]
   end
 
- js_configure do |c|
+ client_class do |c|
     c.layout = :border
-    c.init_component = <<-JS
+    c.init_component = l(<<-JS)
        function(){
          this.callParent();
        }
     JS
+    
  end
   
   component :search_detail do |c|

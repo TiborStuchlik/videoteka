@@ -14,7 +14,7 @@ class SearchDetail < Netzke::Base
       "hledat v csfd ", {xtype: 'textfield', id: "textCsfd" },:scsfd]
   end
   
-  js_configure do |c|
+  client_class do |c|
         
     c.onScsfd = <<-JS
       function(r,t) {
@@ -31,17 +31,17 @@ class SearchDetail < Netzke::Base
     JS
   end
   
-  endpoint :refresh_movie do |p,t|
+  endpoint :refresh_movie do |p|
     puts "ss"
   end
   
-  endpoint :add_import do |p,t|
+  endpoint :add_import do |p|
     i = Import.find(p['import_id'])
     add_movie(p['obj'], i)
     x = read_movie(p['csfd_id'], i)
     i.movie_id = x.id
     i.save
-    t.netzke_feedback("import")
+    client.netzke_Notify("import")
   end
   
   def read_movie(val, i)

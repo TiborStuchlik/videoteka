@@ -1,4 +1,4 @@
-class Application < Netzke::Basepack::Viewport
+class Application < Netzke::Viewport::Base
 
   # A simple mockup of the User model
   class User < Struct.new(:email, :password)
@@ -25,9 +25,9 @@ class Application < Netzke::Basepack::Viewport
     c.text = "Sign out #{current_user.email}" if current_user
   end
 
-  js_configure do |c|
+  client_class do |c|
     c.layout = :fit
-    c.mixin
+
   end
 
   def configure(c)
@@ -49,6 +49,10 @@ class Application < Netzke::Basepack::Viewport
   #
   # Components
   #
+  
+  component :handy
+  
+  component :detail
   
   component :from_text do |c|
     c.desc = "Grid configured with just a model. Implements infinite scrolling, per-column filtering, sorting, and CRUD operations. " + source_code_link(c)
@@ -139,6 +143,7 @@ protected
             :children => [
               leaf("Z textu", :from_text, :bullet_black),
               leaf("Ruřně", :handy, :bullet_black),
+              leaf("Detail", :detail, :bullet_black),
        
             ]}
           ]
