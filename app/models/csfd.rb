@@ -1,8 +1,25 @@
+
+
 class Csfd < Object
-  
+  require "net/http"
+
   @@host = "www.csfd.cz"
-  @@protocol = "http"
-  
+  @@protocol = "https"
+
+  def self.load(uris, prm = nil)
+    params = ""
+    params = "/?" + prm.to_query if prm
+    uri = URI.parse("#{@@protocol}://#{@@host}/"+ uris + params )
+    req = Net::HTTP::Get.new(uri)
+    res = Net::HTTP.start(uri.host, uri.port,
+                          :read_timeout => 30,
+                          :use_ssl => uri.scheme == 'https',
+                          :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |https|
+                                            https.request(req)
+                                          end
+    hres = Nokogiri::HTML(res.body)
+  end
+
   def self.makebox(*info)
     o = "<table border='1' style='border: 1px'><tr>"
     info.each do |i|
@@ -12,11 +29,7 @@ class Csfd < Object
   end
   
   def self.detail(p)
-    uri = URI.parse("#{@@protocol}://#{@@host}/film/" + p + "/prehled/" )
-    http = Net::HTTP.new(uri.host, uri.port)
-    request = Net::HTTP::Get.new(uri.request_uri)
-    hres = http.request(request).body
-    hres = Nokogiri::HTML(hres)
+    hres = self.load("film/" + p + "/prehled/")
     
     out = "<div>"
     oa = []
@@ -90,23 +103,19 @@ class Csfd < Object
   end
    
   def self.search(p)
-    uri = URI.parse("#{@@protocol}://#{@@host}/hledat/?" + p.to_query )
-    http = Net::HTTP.new(uri.host, uri.port)
-    request = Net::HTTP::Get.new(uri.request_uri)
-    hres = http.request(request).body
-    hres = Nokogiri::HTML(hres)  
+    hres = load("hledat", p)
     res = hres.css('div#search-films ul.ui-image-list')
     liv = []
     res.css('li').each do |r|
-      puts r
-      puts "--------------"
+      #puts r
+     # puts "--------------"
       liv.push r
     end
     res = hres.css('div#search-films ul.films')
     lim = []
     res.css('li').each do |r|
-      puts r
-      puts "--------------"
+      #puts r
+      #puts "--------------"
       lim.push r
     end
     [liv,lim]

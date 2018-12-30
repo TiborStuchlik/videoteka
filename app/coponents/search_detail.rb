@@ -13,7 +13,14 @@ class SearchDetail < Netzke::Base
       "->",
       "hledat v csfd ", {xtype: 'textfield', id: "textCsfd" },:scsfd]
   end
-  
+
+  endpoint :search do |p|
+
+    t = get_html(p.to_s)
+    client.netzke_notify("HLEDÁM: " + p.to_s)
+    client.setHtml(t)
+  end
+
   client_class do |c|
         
     c.onScsfd = <<-JS

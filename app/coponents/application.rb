@@ -49,7 +49,19 @@ class Application < Netzke::Viewport::Base
   #
   # Components
   #
-  
+
+  component :genres
+
+  component :roles
+
+  component :countries
+
+  component :boxes
+
+  component :authors
+
+  component :movieteka
+
   component :handy
   
   component :detail
@@ -57,8 +69,7 @@ class Application < Netzke::Viewport::Base
   component :from_text do |c|
     c.desc = "Grid configured with just a model. Implements infinite scrolling, per-column filtering, sorting, and CRUD operations. " + source_code_link(c)
   end
-  
-  
+
   component :movies do |c|
     c.desc = "Grid configured with just a model. Implements infinite scrolling, per-column filtering, sorting, and CRUD operations. " + source_code_link(c)
   end
@@ -129,8 +140,8 @@ protected
               leaf("Filmotéka", :movieteka, :bullet_black),
        
             ]},
-            leaf("Autoři", :actors, :bullet_black),
-            leaf("Role", :roless, :bullet_black),
+            leaf("Autoři", :authors, :bullet_black),
+            leaf("Role", :roles, :bullet_black),
             leaf("Žánry", :genres, :bullet_black),
             leaf("Země", :countries, :bullet_black),
             leaf("Krabice", :boxes, :bullet_black),
@@ -146,13 +157,6 @@ protected
               leaf("Detail", :detail, :bullet_black),
        
             ]}
-          ]
-        },
-
-        { :text => "Editace",
-          :expanded => true,
-          :children => [
-            leaf("Přidávání filmů", :accordion_with_grids, :bullet_black),
           ]
         }
       ]
