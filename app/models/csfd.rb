@@ -6,18 +6,26 @@ class Csfd < Object
   @@host = "www.csfd.cz"
   @@protocol = "https"
 
-  def self.load(uris, prm = nil)
+  def self.load(uris, prm = nil, redirect = false)
     params = ""
     params = "/?" + prm.to_query if prm
-    uri = URI.parse("#{@@protocol}://#{@@host}/"+ uris + params )
+    if redirect
+      uri = URI.parse(uris)
+    else
+      uri = URI.parse("#{@@protocol}://#{@@host}/"+ uris + params )
+    end
     req = Net::HTTP::Get.new(uri)
     res = Net::HTTP.start(uri.host, uri.port,
                           :read_timeout => 30,
                           :use_ssl => uri.scheme == 'https',
                           :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |https|
                                             https.request(req)
-                                          end
-    hres = Nokogiri::HTML(res.body)
+    end
+    if (res.code == "301"|| res.code == "302") && res.header['location']
+      load( res.header['location'], nil, true)
+    else
+      hres = Nokogiri::HTML(res.body)
+    end
   end
 
   def self.makebox(*info)
@@ -28,7 +36,7 @@ class Csfd < Object
     o += "</tr></table>"
   end
 
-  def self.add(oh, id = nil)
+  def self.add(oh, id = nil, mid = nil)
     box = nil
     m_id = nil
     i = nil
@@ -47,6 +55,13 @@ class Csfd < Object
       m.save
       rescue
       end
+    else
+      if mid
+        begin
+          m = Movie.find(mid)
+        rescue
+        end
+      end
     end
     if !m
       m = Movie.new()
@@ -54,6 +69,7 @@ class Csfd < Object
       m.save
     end
     if i
+      m.folder_name = i.file_name
       i.movie_id = m.id
       i.save
     end
@@ -63,7 +79,7 @@ class Csfd < Object
     m.plot = oh['text']
     m.runtime = oh['duration']
     m.csfd_id = oh['csfd'].split("-")[0]
-    m.csfd_url = "http://www.csfd.cz/film/" + oh['csfd'].to_s
+    m.csfd_url = "https://www.csfd.cz/film/" + oh['csfd'].to_s
     m.name_cs = oh['names']['name_cs'] if oh['names']['name_cs']
     if oh['names']['name_Velká Británie']
       m.name_en = oh['names']['name_Velká Británie']

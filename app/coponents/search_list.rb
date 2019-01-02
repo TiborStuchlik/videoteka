@@ -23,8 +23,11 @@ class SearchList < Netzke::Base
     "<div style='height: 100%; overflow: scroll;'>" + get_detail(p) + "</div>"
   end
 
-  endpoint :add_movie do |p, i|
-    "<div style='height: 100%; overflow: scroll;'>" + "add_movie" + "</div>"
+  endpoint :add_movie do |p|
+    po = p.gsub('/film/',"").gsub("/","")
+    d, h = Csfd.detail(po)
+    Csfd.add(h)
+    "Importovano z ČSFD"
   end
 
   def get_detail(p)
@@ -40,7 +43,7 @@ class SearchList < Netzke::Base
       puts "---------------------------------------------"
       "<table><tr><td style='width: 100%'>" + x.to_s + "</td>" +
       "<td><input type=button value='DETAIL' onclick='Ext.getCmp(\"application__handy__search_list\").onGetDetail(\"" + ref + "\")'></td>" +
-      "<td><input type=button value='PRIDEJ' onclick='Ext.getCmp(\"application__handy__search_list\").onAddDetail(\"" + ref + "\")'></td>" +
+      "<td><input type=button value='PŘIDEJ' onclick='Ext.getCmp(\"application__handy__search_list\").onAddDetail(\"" + ref + "\")'></td>" +
       "</tr></table><hr/>"
     end
     obs = ob.map {|x| x.to_s + "<hr/>"}
@@ -60,13 +63,11 @@ class SearchList < Netzke::Base
 
     c.netzke_on_hledej = l(<<-JS)
        function(){
-        
          this.server.search(Ext.getCmp('search_text').value)
-         
        }
     JS
 
-    c.onGetDetail = l(<<-JS)
+    c.on_get_detail = l(<<-JS)
        function(data){
           cmp = this  
           this.server.detail(data, function(ret) {
@@ -76,11 +77,12 @@ class SearchList < Netzke::Base
     JS
 
     c.on_add_detail = l(<<-JS)
-       function(data. imp){
+       function(data, imp){
           cmp = this  
+          d = this.netzkeParent.netzkeGetComponent('sdetail')
           this.server.addMovie(data, imp, function(ret) {
               //cmp.netzkeParent.setDetail(ret)
-              alert("on add movie: " + ret)
+              d.setHtml(ret)
           });         
        }
     JS

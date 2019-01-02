@@ -32,16 +32,18 @@ class MovieList < Netzke::Grid::Base
     end
     c.tbar = [{ xtype: :textfield, fieldLabel: "HLEDEJ", listeners: { change: f('pokus_hokus')}}]
     c.columns = [ :actions,
-                  { name: :box__name, width: 100 },
-                  { name: :year, width: 60, format: "Y" },
+                  { name: :box__name, width: 100, header: "KRABICE" },
+                  { name: :year, width: 60, format: "Y", header: "ROK" },
                   # { name: :rezie, width: 200 },
-                  { name: :name_cs, width: 200 },
+                  { name: :name_cs, width: 200, header: "NÁZEV" },
                   #{ name: :name_en, width: 200 },
                   #{ name: :plot, width: 300 },
-                  { name: :csfd_url, width: 70,
+                  { name: :csfd_url, width: 70, header: "ČSFD",
                     getter: ->(r){ link_to(r.csfd_id.to_s, r.csfd_url.to_s) }
                   },
-                  { name: :runtime, width: 100 },
+                  { name: :runtime, width: 100, header: "ČAS"},
+                  { name: :folder_name, header: "SLOŽKA", width: 300},
+                  { name: :updated_at, header: "AKTUALIZOVÁNO", format: "Y/m/d"}
     #{ name: :content_rating, width: 100 }
 
     ]
@@ -54,8 +56,18 @@ class MovieList < Netzke::Grid::Base
 
   endpoint :reread do |p|
     #component_session[:selected_movie_id] = p[:movie_id]
-    Csfdapi.read_movies(p)
-
+    #Csfdapi.read_movies(p)
+    m = Movie.find(p)
+    m_id = nil
+    begin
+      i = Import.find_by_movie_id(m.id)
+      m_id = i.id
+    rescue
+    end
+    #q = m.csfd_url.gsub("https://","").gsub("http://","").gsub("www.csfd.cz/film/","")
+    o, h = Csfd.detail(m.csfd_id.to_s)
+    Csfd.add(h, m_id, m.id)
+    "Reimportovano z ČSFD"
   end
 
   endpoint :find do |p|
@@ -65,12 +77,18 @@ class MovieList < Netzke::Grid::Base
 
   client_class do |c|
 
-    c.onReread = l(<<-JS)
+    c.netzke_on_reread = l(<<-JS)
       function(r,t) {
-        var idA = this.getSelectionModel().getSelection().map(function(obj){ 
-        return obj.id;
-        });
-        this.reread(idA);
+         d = this.netzkeParent.netzkeGetComponent("movie_detail")
+         id = r.grid.getStore().getAt(t).id
+         this.server.reread(id, function(ret){
+              //cb of reread
+              d.setHtml(ret)
+          }) 
+        //var idA = this.getSelectionModel().getSelection().map(function(obj){ 
+           //return obj.id;
+        //});
+        //this.reread(idA);
         //var sd = this.ownerCt.netzkeGetComponent('search_detail')
         //sd.update(t)
       }
