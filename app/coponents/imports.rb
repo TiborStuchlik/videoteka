@@ -41,39 +41,67 @@ class Imports < Netzke::Grid::Base
         sd.update(t)
       }
     JS
-    
+
+    c.on_get_detail = l(<<-JS)
+      function(r,id) {
+        //alert("tiba: " + r + " id:" + id)
+        d = this.netzkeParent.netzkeGetComponent("search_detail")
+        this.server.addImport(r,id, function(ret){
+          d.setHtml(ret)
+        })
+        //var sd = this.ownerCt.netzkeGetComponent('search_detail')
+        //sd.update(t)
+      }
+    JS
+
     c.init_component = l(<<-JS)
       function(){
         this.callParent();
         var view = this.getView();
 
         view.on('itemclick', function(view, record){
-          this.selectImport({import_id: record.get('id')});
-          this.fillSearch();
+          this.server.selectImport({import_id: record.get('id')});
+          this.server.fillSearch();
         }, this);
       }
     JS
-  end  
+  end
+
+  endpoint :add_import do |p,i|
+    txt = p.gsub("/film/","").gsub("/","")
+    _, rh = Csfd.detail(txt)
+    Csfd.add(rh, i)
+    "Záznam naimportován."
+  end
 
   endpoint :select_import do |p|
     component_session[:selected_import_id] = p[:import_id]
   end  
   
   endpoint :csfd_search do |p|
-    #iid = component_session[:selected_import_id]
+    if component_session[:selected_import_id]
+      iid = component_session[:selected_import_id]
+      i = Import.find(iid)
+      r = csfd_search(p, iid)
+      client.result(r, r)
+    else
+      client.result("Nejprve vyberte zaznam k importu.")
+    end
+
+      #iid = component_session[:selected_import_id]
     #i = Import.find(iid)
-    r = csfd_search(p)
-    client.netzke_feedback(p)
-    client.result(r, (r.map {|m| m[0]}).join)
+    #r = csfd_search(p)
+    #client.netzke_feedback(p)
+    #client.result(r, (r.map {|m| m[0]}).join)
  end 
 
 
-  endpoint :fill_search do |p,t|
+  endpoint :fill_search do
     iid = component_session[:selected_import_id]
     i = Import.find(iid)
-    r = csfd_search(i.name)
-    t.netzke_feedback(i.name)
-    t.result(r, (r.map {|m| m[0]}).join)
+    r = csfd_search(i.name, iid)
+    #t.netzke_feedback(i.name)
+    client.result(r, r)
  end 
   
   def make_html(doc,json)
@@ -99,17 +127,20 @@ class Imports < Netzke::Grid::Base
     o
   end
   
-  def csfd_search(val)
-    st = URI.escape(val.gsub(" ", "+").gsub("_","+"))
-    uri = URI.parse("http://csfdapi.cz/movie?search='" + st + "'")
-    http = Net::HTTP.new(uri.host, uri.port)
-    request = Net::HTTP::Get.new(uri.request_uri)
-    json = http.request(request).body
-    result = JSON.parse(http.request(request).body)
-    r = []
-    result.each do |doc|
-      r << [make_html(doc,doc.to_json), doc, json]
+  def csfd_search(val, iid)
+
+    oa,ob = Csfd.search(q: val.gsub("_"," "))
+    oas = oa.map do |x|
+      ref = x.css('a').attribute('href').to_s
+      "<table><tr><td style='width: 100%'>" + x.to_s + "</td><td><input type=button value='PRIDEJ' onclick='Ext.getCmp(\"application__from_text__imports\").onGetDetail(\"" + ref + "\"," + iid.to_s + ")'></td></tr></table><hr/>"
     end
-    r
+    obs = ob.map do |x|
+      ref = x.css('a').attribute('href').to_s
+      "<table><tr><td style='width: 100%'>" + x.to_s + "</td><td><input type=button value='PRIDEJ' onclick='Ext.getCmp(\"application__from_text__imports\").onGetDetail(\"" + ref + "\"," + iid.to_s + ")'></td></tr></table><hr/>"
+    end
+    rr = oas + obs
+    html = "<ul class='ui-image-list js-odd-even'>" + rr.join + "<ul/>"
+    html = "<div style='height: 100%; overflow: scroll;'>" + html + "</div>"
+    html
   end
 end

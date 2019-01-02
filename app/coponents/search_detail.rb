@@ -5,13 +5,12 @@ class SearchDetail < Netzke::Base
   end
   
   def configure(c)
-    #super
+    super
     c.autoScroll = true
-    c.title = "detail hledani"
     c.width = 600
     c.tbar = [
       "->",
-      "hledat v csfd ", {xtype: 'textfield', id: "textCsfd" },:scsfd]
+      "HLEDAT V ČSFD ", {xtype: 'textfield', id: "textCsfd" },:scsfd]
   end
 
   endpoint :search do |p|
@@ -23,12 +22,16 @@ class SearchDetail < Netzke::Base
 
   client_class do |c|
         
-    c.onScsfd = <<-JS
+    c.netzke_on_scsfd = l(<<-JS)
       function(r,t) {
-       var im = this.ownerCt.netzkeGetComponent('imports')
-        im.csfdSearch(Ext.getCmp('textCsfd').value)
+        me = this
+        im = this.ownerCt.netzkeGetComponent('imports')
+        im.server.csfdSearch(Ext.getCmp('textCsfd').value, function(ret) {
+              me.setHtml(ret)
+          })
         //this.scsfd(Ext.getCmp('textCsfd').value)
       }
+
     JS
     
     c.add = <<-JS

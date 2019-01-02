@@ -39,7 +39,7 @@ class MovieList < Netzke::Grid::Base
                   #{ name: :name_en, width: 200 },
                   #{ name: :plot, width: 300 },
                   { name: :csfd_url, width: 70,
-                    getter: ->(r){ link_to(r.csfd_id, r.csfd_url) }
+                    getter: ->(r){ link_to(r.csfd_id.to_s, r.csfd_url.to_s) }
                   },
                   { name: :runtime, width: 100 },
     #{ name: :content_rating, width: 100 }

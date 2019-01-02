@@ -35,11 +35,10 @@ class Application < Netzke::Viewport::Base
     c.intro_html = "Click on a demo component in the navigation tree"
     c.items = [
       { layout: :border,
-        tbar: [header_html],
         items: [
-          { region: :west, item_id: :navigation, width: 170, split: true, xtype: :treepanel, root: menu, root_visible: false, border: false, title: "Navigation" },
+          { region: :west, item_id: :navigation, width: 140, split: true, xtype: :treepanel, root: menu, root_visible: false, border: false, title: "VIDEOTÉKA 2.0" },
           { region: :center, layout: :border, border: false, items: [
-            { item_id: :main_panel, region: :center, layout: :fit, border: false, items: [{border: false, body_padding: 5, html: "Components will be loaded in this area"}] } # items is only needed here for cosmetic reasons (initial border)
+            { item_id: :main_panel, region: :center, layout: :fit, border: false, items: [{border: false, body_padding: 5, html: "XXX"}] } # items is only needed here for cosmetic reasons (initial border)
           ]}
         ]
       }
@@ -129,36 +128,36 @@ protected
     out = { :text => "Navigace",
       :expanded => true,
       :children => [
+        leaf("MOJE FILMY", :movieteka, :film ),
+        { :text => "EDITACE",
+          :expanded => false,
+          :children => [
+           #   {
+           # :text => "Filmy",
+           # :expanded => true,
+           # :children => [
+           #   leaf("Seznam", :movies, :bullet_black),
+           # ]},
+            leaf("AUTOŘI", :authors, :bullet_black),
+            leaf("ROLE", :roles, :bullet_black),
+            leaf("ŽÁNRY", :genres, :bullet_black),
+            leaf("ZEMĚ", :countries, :bullet_black),
+            leaf("KRABICE", :boxes, :bullet_black),
+            #leaf("Soubory", :files, :bullet_black),
+            #leaf("Originální Média", :mediums, :bullet_black),
+            #leaf("Přenosná média", :transports, :bullet_black),
 
-        { :text => "Prohlížení",
-          :expanded => true,
-          :children => [{
-            :text => "Filmy",  
-            :expanded => true,
-            :children => [
-              leaf("Seznam", :movies, :film),
-              leaf("Filmotéka", :movieteka, :bullet_black),
-       
-            ]},
-            leaf("Autoři", :authors, :bullet_black),
-            leaf("Role", :roles, :bullet_black),
-            leaf("Žánry", :genres, :bullet_black),
-            leaf("Země", :countries, :bullet_black),
-            leaf("Krabice", :boxes, :bullet_black),
-            leaf("Soubory", :files, :bullet_black),
-            leaf("Originální Média", :mediums, :bullet_black),
-            leaf("Přenosná média", :transports, :bullet_black),
-            {
-            :text => "Imports",  
-            :expanded => true,
-            :children => [
-              leaf("Z textu", :from_text, :bullet_black),
-              leaf("Ruřně", :handy, :bullet_black),
-              leaf("Detail", :detail, :bullet_black),
-       
-            ]}
           ]
-        }
+        },
+        {
+            :text => "IMPORT",
+            :expanded => false,
+            :children => [
+                leaf("Z TABULKY", :from_text, :bullet_black),
+                leaf("Z ČSFD ", :handy, :bullet_black),
+                #leaf("Detail", :detail, :bullet_black),
+
+            ]}
       ]
     }
 

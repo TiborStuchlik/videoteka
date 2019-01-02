@@ -23,9 +23,14 @@ class SearchList < Netzke::Base
     "<div style='height: 100%; overflow: scroll;'>" + get_detail(p) + "</div>"
   end
 
+  endpoint :add_movie do |p, i|
+    "<div style='height: 100%; overflow: scroll;'>" + "add_movie" + "</div>"
+  end
+
   def get_detail(p)
     po = p.gsub('/film/',"").gsub("/","")
-    Csfd.detail(po)
+    d, h = Csfd.detail(po)
+    d
   end
 
   def get_html(val = "kosta")
@@ -33,7 +38,10 @@ class SearchList < Netzke::Base
     oas = oa.map do |x|
       ref = x.css('a').attribute('href').to_s
       puts "---------------------------------------------"
-      "<table><tr><td style='width: 100%'>" + x.to_s + "</td><td><input type=button value='PRIDEJ' onclick='Ext.getCmp(\"application__handy__search_list\").onGetDetail(\"" + ref + "\")'></td></tr></table><hr/>"
+      "<table><tr><td style='width: 100%'>" + x.to_s + "</td>" +
+      "<td><input type=button value='DETAIL' onclick='Ext.getCmp(\"application__handy__search_list\").onGetDetail(\"" + ref + "\")'></td>" +
+      "<td><input type=button value='PRIDEJ' onclick='Ext.getCmp(\"application__handy__search_list\").onAddDetail(\"" + ref + "\")'></td>" +
+      "</tr></table><hr/>"
     end
     obs = ob.map {|x| x.to_s + "<hr/>"}
     rr = oas + obs
@@ -67,6 +75,15 @@ class SearchList < Netzke::Base
        }
     JS
 
+    c.on_add_detail = l(<<-JS)
+       function(data. imp){
+          cmp = this  
+          this.server.addMovie(data, imp, function(ret) {
+              //cmp.netzkeParent.setDetail(ret)
+              alert("on add movie: " + ret)
+          });         
+       }
+    JS
 
   end
 

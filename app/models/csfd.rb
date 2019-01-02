@@ -27,22 +27,104 @@ class Csfd < Object
     end
     o += "</tr></table>"
   end
+
+  def self.add(oh, id = nil)
+    box = nil
+    m_id = nil
+    i = nil
+
+    if id
+      i = Import.find(id)
+      if i
+        box = Box.find_or_create_by( name: i.box)
+        m_id = i.movie_id
+      end
+    end
+    if m_id
+      begin
+      m = Movie.find(m_id)
+      m.box = box if box
+      m.save
+      rescue
+      end
+    end
+    if !m
+      m = Movie.new()
+      m.box = box if box
+      m.save
+    end
+    if i
+      i.movie_id = m.id
+      i.save
+    end
+
+    m.year = Time.new(oh['year'].to_i,1,1,0,0,0,"+00:00")
+    m.poster_url = "https:" + oh['image_url'].to_s
+    m.plot = oh['text']
+    m.runtime = oh['duration']
+    m.csfd_id = oh['csfd'].split("-")[0]
+    m.csfd_url = "http://www.csfd.cz/film/" + oh['csfd'].to_s
+    m.name_cs = oh['names']['name_cs'] if oh['names']['name_cs']
+    if oh['names']['name_Velká Británie']
+      m.name_en = oh['names']['name_Velká Británie']
+    else
+      m.name_en = oh['names']['name_USA'] if oh['names']['name_USA']
+    end
+    m.name_sk = oh['names']['name_Slovensko'] if oh['names']['name_Slovensko']
+    m.genres = []
+    oh['genres'].each do |g|
+      gg = Genre.find_or_create_by( name: g)
+      m.genres << gg
+    end
+    m.countries = []
+    oh['countries'].each do |c|
+      cc = Country.find_or_create_by( name: c)
+      m.countries << cc
+    end
+    m.roles = []
+    m.save
+    oh['role'].each do |rk,rh|
+      r = Role.find_or_create_by( name: rk)
+      m.roles << r
+      m.reload
+      mr = m.movie_roles.find_by_role_id(r.id)
+      rh.each do |aa|
+        a = Author.find_or_create_by( name: aa[:name])
+        a.csfd_url = "https://www.csfd.cz" + aa[:url].to_s
+        a.csfd_id = aa[:url].gsub("/tvurce/","").split("-")[0]
+        a.save
+        mr.authors << a
+      end
+
+    end
+
+    m.save
+    oh['role'].each do |ok, ov|
+      puts ok.to_s + ": " + ov.inspect
+    end
+    oh.inspect
+  end
   
   def self.detail(p)
     hres = self.load("film/" + p + "/prehled/")
     
     out = "<div>"
     oa = []
+    oh = { "csfd" => p}
     res = hres.css('div#main')
     
     #poster image
     res_poster = res.css('img.film-poster')
-    poster_info = res_poster.attribute('src')
+    poster_info = ""
+    poster_info = res_poster.attribute('src') if res_poster.size > 0
     oa << makebox(res_poster.to_s, poster_info, "image_url")    
-    
+    oh["image_url"] = poster_info.to_s
+
     #neme cs
+    oh['names'] = {}
     nazev = res.css('h1[@itemprop = "name"]')
     oa << makebox(nazev.to_s, nazev.text.strip ,"name_cs")
+    oh['names']["name_cs"] = nazev.text.strip
     
     #dalsi nazvy
     nazvy = res.css('ul.names')
@@ -50,41 +132,51 @@ class Csfd < Object
       t = "name_" + n.css('img').attribute('alt').to_s
       nn = n.css('h3').text
       oa << makebox(n.to_s, nn , t)
+      oh['names'][t] = nn
     end
     
     #genre
+    oh['genres'] = []
     genres = res.css('p.genre').text
     ga = genres.split(" / ")
     ga.each do |g|
       oa << makebox(genres, g, "genre_" + g)
+      oh['genres'] << g
     end
   
     #zeme
     country = res.css('p.origin').text
     ga = country.split(", ")
-    
+    oh['countries'] = []
     ga[0].split(" / ").each do |g|
       oa << makebox( country, g, "country_" + g)
+      oh['countries'] << g
     end
 
     #rok vyroby
     oa << makebox( country, ga[1], "year_" + ga[1])
-    
+    oh['year'] = ga[1]
+
     #duration
     oa << makebox( country, ga[2], "duration_" + ga[2])
-    
+    oh['duration'] = ga[2]
+
     #people
+    oh['role'] = {}
     cre = res.css("div.creators div")
     cre.css("div").each do |c|
       dd = c.css('h4')
       d = dd.text.gsub(":","")
       next if c.attribute('id').to_s == "next-professions"
       aa = []
+      pp = []
       c.css('span a').each do |a|
         aa << makebox( a.to_s, a.text , "creator_" + a.text)
+        pp << { name: a.text, url: a.attribute('href').to_s}
       end
       aao = "<div>" + aa.join + "</div>"
       oa << makebox( c.to_s, d, "role_" + d + aao )
+      oh['role'][d] = pp
       #oa << makebox( c.to_s, "x", "creator_" )
     end
     
@@ -92,6 +184,7 @@ class Csfd < Object
     txt = res.css('div#plots div.content ul li')
     tx = txt.first.css('div').first
     oa << makebox( tx.to_s, tx.text, "text" )
+    oh['text'] = tx.text.strip
     
     
     out += oa.join("<hr/>")
@@ -99,7 +192,7 @@ class Csfd < Object
     out += "<hr/>" + "<hr/>"
     out += res.to_s
     out += "</div>"
-
+    [out,oh]
   end
    
   def self.search(p)

@@ -2,8 +2,8 @@ class FromText < Netzke::Base
   def configure(c)
     #super
         c.items = [
-      { component: :imports, title: "Imports", region: "center" },
-      { component: :search_detail, title: "Hledat", region: "east" }
+      { component: :imports, title: "K IMPORTU", region: "center" },
+      { component: :search_detail, region: "east" }
     ]
   end
 
@@ -18,7 +18,6 @@ class FromText < Netzke::Base
  end
   
   component :search_detail do |c|
-    c.desc = "Hledani"
   end
 
   component :search_list do |c|

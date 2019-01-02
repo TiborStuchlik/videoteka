@@ -8,7 +8,7 @@ class MovieDetail < Netzke::Base
     c.region = :east
     c.width = 500
     c.split = true
-    c.html = "select movie"
+    c.html = "<div style='padding: 5px'>Pro více podrobností vyberte film v levém panelu.</div>"
   end
 
 
