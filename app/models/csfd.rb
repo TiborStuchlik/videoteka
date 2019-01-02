@@ -10,6 +10,9 @@ class Csfd < Object
     params = ""
     params = "/?" + prm.to_query if prm
     if redirect
+      if !uris.include?("www.csfd.cz")
+        uris = "#{@@protocol}://#{@@host}" + uris
+      end
       uri = URI.parse(uris)
     else
       uri = URI.parse("#{@@protocol}://#{@@host}/"+ uris + params )
