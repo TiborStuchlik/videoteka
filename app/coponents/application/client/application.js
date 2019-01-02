@@ -11,7 +11,9 @@
     this.infoPanel = this.down('panel[itemId="info_panel"]');
 
     this.on('afterrender', function() {
-      if (this.introHtml) this.updateInfo(this.introHtml);
+      //if (this.introHtml) this.updateInfo(this.introHtml);
+        var record = this.navigation.getStore().getById('movieteka');
+        this.navigation.getSelectionModel().select(record)
     }, this);
 
     this.navigation.on('select', function(m, r) {
